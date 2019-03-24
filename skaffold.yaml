@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/vittorio-curcio-gmail-com/jx-spring-poc:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/vittorio-curcio-gmail-com/jx-spring-poc:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: jx-spring-poc
+        chartPath: charts/jx-spring-poc
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/vittorio-curcio-gmail-com/jx-spring-poc'
+          image.tag: '{{.DIGEST_HEX}}'
